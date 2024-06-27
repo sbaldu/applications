@@ -3,10 +3,15 @@ import validate as val
 import uproot
 from glob import glob
 import CLUEstering as clue
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 import sys
 np.set_printoptions(threshold=sys.maxsize)
+
+save = False
+if len(sys.argv) > 1:
+    if sys.argv[1] == 'save':
+        save = True
 
 #
 # Load the data
@@ -75,7 +80,8 @@ for pars in parameters:
     c.set_params(*pars)
     c.run_clue()
     print(f"number of clusters = {c.clust_prop.n_clusters}")
-    c.cluster_plotter()
+    if not save:
+        c.cluster_plotter()
 
     clusters = [[] for _ in range(c.clust_prop.n_clusters)]
     for i, c_id in enumerate(c.clust_prop.cluster_ids):
