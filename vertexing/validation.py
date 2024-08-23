@@ -22,8 +22,8 @@ def compute_efficiency(table: np.ndarray, n_sims: int) -> float:
 
     return reconstructed / n_sims
 
-def compute_purity(table: np.ndarray, sim_vertices: list) -> float:
-    purity = 0.
+def compute_purity(table: np.ndarray, reco_vertices:list, sim_vertices: list) -> float:
+    pure_recos = 0.
     for sim_id, sim_vertex in enumerate(sim_vertices):
         matching_cluster = reco_vertices[np.argmax(table[sim_id])]
         noise_tracks = 0
@@ -31,8 +31,10 @@ def compute_purity(table: np.ndarray, sim_vertices: list) -> float:
             if track not in sim_vertex:
                 noise_tracks += 1
         if noise_tracks < 0.2 * len(sim_vertex):
-            purity += 1.
-    purity /= len(sim_vertices)
+            pure_recos += 1
+
+    assert pure_recos <= len(reco_vertices)
+    return pure_recos / len(sim_vertices)
 
 def compute_fake_rate(table: np.ndarray, n_recos: int) -> float:
     fakes = 0
@@ -73,14 +75,8 @@ def evaluate_reconstruction(reco_vertices: list, sim_vertices: list) -> Result:
             if count > (len(sim_vertex) / 2):
                 table[sim_id][reco_id] = count
 
-    plt.imshow(table, cmap='cividis')
-    plt.colorbar()
-    plt.xlabel('Reconstructed Vertices')
-    plt.ylabel('Simulated Vertices')
-    plt.show()
-
     efficiency = compute_efficiency(table, len(sim_vertices))
-    purity = compute_purity(table, sim_vertices)
+    purity = compute_purity(table, reco_vertices, sim_vertices)
     fake_rate = compute_fake_rate(table, len(reco_vertices))
     duplicate_rate = compute_duplicate_rate(table, len(reco_vertices))
     merge_rate = compute_merge_rate(table, len(reco_vertices))
