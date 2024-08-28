@@ -50,7 +50,7 @@ def compute_duplicate_rate(table: np.ndarray, n_recos: int) -> float:
     for sim_vertex_matches in table:
         matches = np.nonzero(sim_vertex_matches)[0]
         if len(matches) > 1:
-            duplicates.union(set(matches))
+            duplicates = duplicates.union(set(matches))
     assert len(duplicates) <= n_recos
     return len(duplicates) / n_recos
 
