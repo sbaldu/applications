@@ -97,28 +97,78 @@ def test_odf(c: clue.clusterer,
         duplicate_rate.append(result.duplicate_rate)
         merge_rate.append(result.merge_rate)
     fig, ax = plt.subplots(1, 2, figsize=(16, 6))
-    ax[0].plot(odf_range, efficiency, 'b-o', label='Efficiency')
-    ax[0].plot(odf_range, purity, 'r--^', label='Purity')
-    ax[0].set_xlabel('ODF', fontsize=14)
-    ax[0].set_ylabel('Efficiency/Purity', fontsize=14)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
+    ax[0].plot(odf_range * dc, efficiency, 'b-o', label='Efficiency')
+    ax[0].plot(odf_range * dc, purity, 'r--^', label='Purity')
+    ax[0].set_xlabel('$\delta_o$', fontsize=16)
+    ax[0].set_ylabel('Efficiency/Purity', fontsize=16)
+    # plt.xticks(fontsize=14)
+    # plt.yticks(fontsize=14)
     ax[0].set_title(f'Efficiency/Purity vs ODF, $\delta_c$={dc}', fontsize=16)
-    ax[0].legend(fontsize=14)
+    ax[0].legend(fontsize=16)
     ax[0].grid(lw=0.5, ls='--', alpha=0.8)
 
-    ax[1].plot(odf_range, fake_rate, 'c--*', label='Fake Rate')
-    ax[1].plot(odf_range, duplicate_rate, 'm:+', label='Duplicate Rate')
-    ax[1].plot(odf_range, merge_rate, 'y-.v', label='Merge Rate')
-    ax[1].set_xlabel('ODF', fontsize=14)
-    ax[1].set_ylabel('Rates', fontsize=14)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
+    ax[1].plot(odf_range * dc, fake_rate, 'c--*', label='Fake Rate')
+    ax[1].plot(odf_range * dc, duplicate_rate, 'm:+', label='Duplicate Rate')
+    ax[1].plot(odf_range * dc, merge_rate, 'y-.v', label='Merge Rate')
+    ax[1].set_xlabel('$\delta_o$', fontsize=16)
+    ax[1].set_ylabel('Rates', fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.ylim(0., 1.)
     ax[1].set_title(f'Rate vs ODF, $\delta_c$={dc}', fontsize=16)
     ax[1].legend(fontsize=14)
     ax[1].grid(lw=0.5, ls='--', alpha=0.8)
     # plt.show()
-    plt.savefig(f'plots/vertexing_dc_{dc}.pdf')
+    plt.savefig(f'plots/vertexing_dc_{dc}_rhoc_{rhoc}.pdf')
+    plt.clf()
+
+def test_rhoc(c: clue.clusterer,
+             dc: float,
+             odf: float,
+             rhoc_range,
+             sim_vertices: list,
+             sim_ids: list) -> tuple:
+
+    efficiency = []
+    purity = []
+    fake_rate = []
+    duplicate_rate = []
+    merge_rate = []
+    for rhoc in rhoc_range:
+        c.set_params(dc, rhoc, odf)
+        c.run_clue()
+        reco_vertices = construct_reco_vertices(c)
+
+        result = evaluate_reconstruction(reco_vertices, sim_vertices)
+        efficiency.append(result.efficiency)
+        purity.append(result.purity)
+        fake_rate.append(result.fake_rate)
+        duplicate_rate.append(result.duplicate_rate)
+        merge_rate.append(result.merge_rate)
+    fig, ax = plt.subplots(1, 2, figsize=(16, 6))
+    ax[0].plot(rhoc_range, efficiency, 'b-o', label='Efficiency')
+    ax[0].plot(rhoc_range, purity, 'r--^', label='Purity')
+    ax[0].set_xlabel('$\delta_o$', fontsize=16)
+    ax[0].set_ylabel('Efficiency/Purity', fontsize=16)
+    # plt.xticks(fontsize=14)
+    # plt.yticks(fontsize=14)
+    ax[0].set_title(f'Efficiency/Purity vs ODF, $\delta_c$={dc}', fontsize=16)
+    ax[0].legend(fontsize=16)
+    ax[0].grid(lw=0.5, ls='--', alpha=0.8)
+
+    ax[1].plot(rhoc_range, fake_rate, 'c--*', label='Fake Rate')
+    ax[1].plot(rhoc_range, duplicate_rate, 'm:+', label='Duplicate Rate')
+    ax[1].plot(rhoc_range, merge_rate, 'y-.v', label='Merge Rate')
+    ax[1].set_xlabel('rho_c', fontsize=16)
+    ax[1].set_ylabel('Rates', fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    ax[1].set_title(f'Rate vs ODF, $\delta_c$={dc}', fontsize=16)
+    ax[1].legend(fontsize=14)
+    ax[1].grid(lw=0.5, ls='--', alpha=0.8)
+    # plt.show()
+    plt.savefig(f'plots/vertexing_dc_{dc}_odf_{odf}.pdf')
+
 
 input_folder = "./data/"
 files = glob(f"{input_folder}/*.root")

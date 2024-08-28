@@ -25,16 +25,17 @@ def compute_efficiency(table: np.ndarray, n_sims: int) -> float:
 def compute_purity(table: np.ndarray, reco_vertices:list, sim_vertices: list) -> float:
     pure_recos = 0.
     for sim_id, sim_vertex in enumerate(sim_vertices):
-        matching_cluster = reco_vertices[np.argmax(table[sim_id])]
-        noise_tracks = 0
-        for track in matching_cluster:
-            if track not in sim_vertex:
-                noise_tracks += 1
-        if noise_tracks < 0.2 * len(sim_vertex):
-            pure_recos += 1
-
+        matches = np.nonzero(table[sim_id])[0]
+        for reco_id in matches:
+            reco_vertex = reco_vertices[reco_id]
+            noise_tracks = 0
+            for track in reco_vertex:
+                if track not in sim_vertex:
+                    noise_tracks += 1
+            if noise_tracks < 0.2 * len(reco_vertex):
+                pure_recos += 1
     assert pure_recos <= len(reco_vertices)
-    return pure_recos / len(sim_vertices)
+    return pure_recos / len(reco_vertices)
 
 def compute_fake_rate(table: np.ndarray, n_recos: int) -> float:
     fakes = 0
