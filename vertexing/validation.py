@@ -63,7 +63,9 @@ def compute_merge_rate(table: np.ndarray, n_recos: int) -> float:
     assert merged <= n_recos
     return merged / n_recos
 
-def evaluate_reconstruction(reco_vertices: list, sim_vertices: list) -> Result:
+def evaluate_reconstruction(reco_vertices: list,
+                            sim_vertices: list,
+                            association_cut: float = .4) -> Result:
     # table of simulated vertices and matching clusters
     table = np.zeros((len(sim_vertices), len(reco_vertices)))
     for sim_id, sim_vertex in enumerate(sim_vertices):
@@ -72,10 +74,11 @@ def evaluate_reconstruction(reco_vertices: list, sim_vertices: list) -> Result:
             for track_id in reco_vertex:
                 if track_id in sim_vertex:
                     count += 1
-            # check if the cluster contains more than half of the sim vertex
-            if count > (len(sim_vertex) / 2):
+            if count >= (association_cut * len(sim_vertex)):
                 table[sim_id][reco_id] = count
 
+    # plt.imshow(table, cmap='hot', interpolation='nearest')
+    # plt.show()
     efficiency = compute_efficiency(table, len(sim_vertices))
     purity = compute_purity(table, reco_vertices, sim_vertices)
     fake_rate = compute_fake_rate(table, len(reco_vertices))
@@ -83,3 +86,11 @@ def evaluate_reconstruction(reco_vertices: list, sim_vertices: list) -> Result:
     merge_rate = compute_merge_rate(table, len(reco_vertices))
 
     return Result(table, efficiency, purity, fake_rate, duplicate_rate, merge_rate)
+
+if __name__ == "__main__":
+    # 100% merged
+    res = evaluate_reconstruction([[0,1,2,3,4,5,6,7]], [[0,1,2,3], [4,5,6,7]])
+    print(res)
+    # 100% duplicates
+    res = evaluate_reconstruction([[0,1,2,3], [4,5,6,7]], [[0,1,2,3,4,5,6,7]])
+    print(res)
