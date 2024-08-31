@@ -45,14 +45,14 @@ def compute_fake_rate(table: np.ndarray, n_recos: int) -> float:
     assert fakes <= n_recos
     return fakes / n_recos
 
-def compute_duplicate_rate(table: np.ndarray, n_recos: int) -> float:
-    duplicates = set([])
+def compute_duplicate_rate(table: np.ndarray, n_sims: int) -> float:
+    duplicates = 0
     for sim_vertex_matches in table:
         matches = np.nonzero(sim_vertex_matches)[0]
         if len(matches) > 1:
-            duplicates = duplicates.union(set(matches))
-    assert len(duplicates) <= n_recos
-    return len(duplicates) / n_recos
+            duplicates += 1
+    assert duplicates <= n_sims
+    return duplicates / n_sims
 
 def compute_merge_rate(table: np.ndarray, n_recos: int) -> float:
     merged = 0
@@ -82,7 +82,7 @@ def evaluate_reconstruction(reco_vertices: list,
     efficiency = compute_efficiency(table, len(sim_vertices))
     purity = compute_purity(table, reco_vertices, sim_vertices)
     fake_rate = compute_fake_rate(table, len(reco_vertices))
-    duplicate_rate = compute_duplicate_rate(table, len(reco_vertices))
+    duplicate_rate = compute_duplicate_rate(table, len(sim_vertices))
     merge_rate = compute_merge_rate(table, len(reco_vertices))
 
     return Result(table, efficiency, purity, fake_rate, duplicate_rate, merge_rate)
